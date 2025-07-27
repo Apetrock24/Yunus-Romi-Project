@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.driveCommands.RomiDriveDefault;
 import frc.robot.constants.Constants;
+import frc.robot.constants.Settings;
 import frc.robot.constants.gains;
 import frc.robot.constants.ports;
 import frc.robot.constants.gains.turnToDegreePID;
@@ -40,7 +42,9 @@ public class RomiDrivetrainimpl extends RomiDrivetrain { // 70 mm
   private BuiltInAccelerometer accelerometer;
   private DifferentialDrive drive = new DifferentialDrive(leftMotor, rightMotor);
 
-  // private ProfiledPIDController turnToDegrees = new PIDController(gains.turnToDegreePID.kp, gains.turnToDegreePID.kki, gains.turnToDegreePID.kd, new TrapezoidProfile(0,0 =c =));
+  //private ProfiledPIDController turnToDegreesPID = new ProfiledPIDController(gains.turnToDegreePID.kp, gains.turnToDegreePID.ki, gains.turnToDegreePID.kd, new TrapezoidProfile.Constraints(0, 0));
+  //TODO: implement pid/ff contoller for turn
+  private SimpleMotorFeedforward turnToDegreeFF;
   // // Set up the differential drive controller
 
   /** Creates a new RomiDrivetrain. */
@@ -59,11 +63,13 @@ public class RomiDrivetrainimpl extends RomiDrivetrain { // 70 mm
     // Invert right side since motor is flipped
     rightMotor.setInverted(true);
 
+    turnToDegreeFF = new SimpleMotorFeedforward(gains.turnToDegreeFF.ks, gains.turnToDegreeFF.kv, gains.turnToDegreeFF.ka);
+
   }
   
   @Override
   public void arcadeDrive(double xaxisSpeed, double zaxisRotate) {
-    drive.arcadeDrive(xaxisSpeed, zaxisRotate);
+    drive.arcadeDrive(xaxisSpeed, zaxisRotate, true);
   }
 
   @Override
@@ -99,10 +105,18 @@ public class RomiDrivetrainimpl extends RomiDrivetrain { // 70 mm
     return gyro.getAngleZ();
   }
 
-  // public void turnToDegree(Rotation2d target) {
-  //   leftMotor.setVoltage(turnToDegreePID(target.getDegrees()));
-  //   rightMotor.setVoltage();
-  // }
+  public void turnToDegree(Rotation2d target) {
+    while (!(Math.abs(target.getDegrees() - this.getGyroX()) < Settings.tollerances.angleTolerance)) {
+      leftMotor.setVoltage(turnToDegreeFF.calculate(target.getDegrees()));
+      rightMotor.setVoltage(-turnToDegreeFF.calculate(target.getDegrees()));
+    }
+  }
+  
+  public void getaveragedistance(double distanceinches) {
+    while (distanceinches - ((leftEncoder.getDistance() + rightEncoder.getDistance())/2) > Settings.tollerances.distancetolleranceinch) {
+      
+    }
+  }
 
   @Override
   public void periodic() {

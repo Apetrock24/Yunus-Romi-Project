@@ -5,9 +5,10 @@ import com.stuypulse.stuylib.input.Gamepad;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class RomiDriveDefault extends Command{
+public class RomiDriveDefault extends InstantCommand{
     private final RomiDrivetrain drivetrain = RomiDrivetrain.getinstance();
     double xAxisSpeed = 0;
     double yAxisSpeed = 0;

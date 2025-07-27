@@ -60,7 +60,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
      controller.getTopButton()
-       .onTrue(new timeDriveStraight(5, 1));
+       .onTrue(new timeDriveStraight(2, 0.08));
   }
 
   /**
